@@ -30,14 +30,14 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-include_once dirname(__FILE__).'/OutStock.php';
+include_once dirname(__FILE__).'/PsOutstock.php';
 
-class OutOfStock extends Module implements WidgetInterface
+class PsOutOfStock extends Module implements WidgetInterface
 {
 
     public function __construct()
     {
-        $this->name = 'outofstock';
+        $this->name = 'psoutofstock';
         $this->version = '1.0.0';
         $this->author = 'alexbaysu07@gmail.com';
         $this->need_instance = 0;
@@ -58,17 +58,14 @@ class OutOfStock extends Module implements WidgetInterface
 
     public function install()
     {
-        return parent::install()
-            && $this->installDB()
-            && $this->registerHook('actionUpdateQuantity')
-            ;
+        return parent::install() && $this->installDB() && $this->registerHook('actionUpdateQuantity');
     }
 
     public function installDB()
     {
         $return = true;
         $return &= Db::getInstance()->execute('
-            CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'out_stock` (
+            CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'ps_out_stock` (
                 `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
                 `id_shop` int(10) unsigned NOT NULL ,
                 `id_product` int NOT NULL,
@@ -83,19 +80,16 @@ class OutOfStock extends Module implements WidgetInterface
 
     public function uninstall()
     {
-        return
-            $this->uninstallDB() &&
-            parent::uninstall();
+        return $this->uninstallDB() && parent::uninstall();
     }
 
     public function uninstallDB()
     {
-        return Db::getInstance()->execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'out_stock`');
+        return Db::getInstance()->execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'ps_out_stock`');
     }
 
     public function renderWidget($hookName = null, array $configuration = [])
     {
-
     }
 
     public function hookActionUpdateQuantity($params)
@@ -108,7 +102,7 @@ class OutOfStock extends Module implements WidgetInterface
         $id_shop = (int) $context->shop->id;
 
         if($quantity<1){
-            $newStock=new OutStock();
+            $newStock=new PsOutstock();
             $newStock->id_product=$id_product;
             $newStock->id_product_attribute=$id_product_attribute;
             $newStock->id_shop=$id_shop;
@@ -119,8 +113,6 @@ class OutOfStock extends Module implements WidgetInterface
 
     public function getWidgetVariables($hookName = null, array $configuration = [])
     {
-
-
     }
 
 }

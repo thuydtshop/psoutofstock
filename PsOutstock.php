@@ -24,10 +24,9 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-class OutStock extends ObjectModel
+class PsOutstock extends ObjectModel
 {
     public $id;
-
 
     public $id_product;
 
@@ -37,12 +36,11 @@ class OutStock extends ObjectModel
 
     public $date_update;
 
-
     /**
      * @see ObjectModel::$definition
      */
     public static $definition = array(
-        'table' => 'out_stock',
+        'table' => 'ps_out_stock',
         'primary' => 'id',
         'fields' => array(
             'id_shop' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
@@ -51,7 +49,4 @@ class OutStock extends ObjectModel
             'date_update' => array('type' => self::TYPE_DATE, 'shop' => true, 'validate' => 'isDate'),
         ),
     );
-
-
-
 }

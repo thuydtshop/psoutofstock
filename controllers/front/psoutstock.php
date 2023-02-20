@@ -24,7 +24,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-use PrestaShop\PrestaShop\Adapter\Category\CategoryProductSearchProvider;
+// use PrestaShop\PrestaShop\Adapter\Category\CategoryProductSearchProvider;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
@@ -35,9 +35,8 @@ use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
 use PrestaShop\PrestaShop\Core\Product\Search\Pagination;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchResult;
 
-class OutofstockOutstockModuleFrontController extends ProductListingFrontController
+class PsOutofstockOutstockModuleFrontController extends ProductListingFrontController
 {
-      
     /**
      * Initializes controller.
      *
@@ -55,22 +54,19 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
      */
     public function initContent()
     {
-
         parent::initContent();
-        $template ='../../../modules/outofstock/views/templates/product-list.tpl';
-            $this->doProductSearch(
-                $template,
-                [   
-                ]
-            );
-        
+        $template ='../../../modules/psoutofstock/views/templates/product-list.tpl';
+        $this->doProductSearch(
+            $template,
+            []
+        );
     }
 
     private function getTotalProductSTock($qry)
     {
         $query = new DbQuery();
         $query->select('*');
-        $query->from('out_stock');
+        $query->from('ps_out_stock');
         $query->where('date_update  >= DATE_ADD(CURDATE(), INTERVAL "-15" DAY) ');
 
         $query->orderBy('date_update desc');
@@ -78,12 +74,13 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
 
         $context = Context::getContext();
         $id_shop = (int) $context->shop->id;
-        $id_lang = (int) $context->language->id;
+        // $id_lang = (int) $context->language->id;
 
         $productOutOfStock = Db::getInstance()->executeS($query);
 
-        if(empty($productOutOfStock))
+        if(empty($productOutOfStock)) {
             return false;
+        }
 
         $backList=array();
 
@@ -111,46 +108,46 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
 
     protected function getBackStockProduct($qry)
     {
-         $query = new DbQuery();
-         $query->select('*');
-         $query->from('out_stock');
-         $query->where('date_update  >= DATE_ADD(CURDATE(), INTERVAL "-15" DAY) ');
+        $query = new DbQuery();
+        $query->select('*');
+        $query->from('ps_out_stock');
+        $query->where('date_update  >= DATE_ADD(CURDATE(), INTERVAL "-15" DAY) ');
         
-         $query->orderBy('date_update desc');
-         $query->groupBy('id_product,id_product_attribute');
+        $query->orderBy('date_update desc');
+        $query->groupBy('id_product,id_product_attribute');
 
         $context = Context::getContext();
         $id_shop = (int) $context->shop->id;
-        $id_lang = (int) $context->language->id;
+        // $id_lang = (int) $context->language->id;
 
         $productOutOfStock = Db::getInstance()->executeS($query);
 
-         if(empty($productOutOfStock))
+        if(empty($productOutOfStock)) {
             return false;
+        }
 
-         $backList=array();
+        $backList = array();
 
         // get all stock 0 before get when stock back it
         foreach ($productOutOfStock as $stock) {
             // check if product qty >1
-             $query = new DbQuery();
-             $query->select('quantity');
-             $query->from('stock_available');
-             $query->where('quantity > 0 AND id_shop = '.$id_shop.' and id_product = '.$stock["id_product"].' AND id_product_attribute = '.$stock["id_product_attribute"].' ');
-             $totalAddedQty = Db::getInstance()->getValue($query);
+            $query = new DbQuery();
+            $query->select('quantity');
+            $query->from('stock_available');
+            $query->where('quantity > 0 AND id_shop = '.$id_shop.' and id_product = '.$stock["id_product"].' AND id_product_attribute = '.$stock["id_product_attribute"].' ');
+            $totalAddedQty = Db::getInstance()->getValue($query);
 
-             if(!empty($totalAddedQty)){
-                 $backList[]=$stock;
-             }
+            if(!empty($totalAddedQty)){
+                $backList[]=$stock;
+            }
         }
 
-
-        if(empty($backList))
+        if(empty($backList)) {
             return false;
-
+        }
          
         if (!empty($backList)) {
-            $assembler = new ProductAssembler($this->context);
+            // $assembler = new ProductAssembler($this->context);
 
             $presenterFactory = new ProductPresenterFactory($this->context);
             $presentationSettings = $presenterFactory->getPresentationSettings();
@@ -173,13 +170,17 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
                         continue;
                     }
 
-                	   $product = (new ProductAssembler($this->context))
-            ->assembleProduct(array('id_product' => $productId['id_product'],'id_product_attribute' => $productId['id_product_attribute']));
-                        $products_for_template[] = $presenter->present(
-                            $presentationSettings,
-                           $product,
-                            $this->context->language
-                        );
+                    $product = (new ProductAssembler($this->context))
+                        ->assembleProduct(array(
+                            'id_product' => $productId['id_product'],
+                            'id_product_attribute' => $productId['id_product_attribute']
+                        ));
+
+                    $products_for_template[] = $presenter->present(
+                        $presentationSettings,
+                        $product,
+                        $this->context->language
+                    );
                 }
             }
 
@@ -189,8 +190,7 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
         return false;
     }
 
-
-     protected function getProductSearchVariables()
+    protected function getProductSearchVariables()
     {
         $context = $this->getProductSearchContext();
 
@@ -210,10 +210,7 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
         }
 
         // we need to set a few parameters from back-end preferences
-        $query
-            ->setResultsPerPage($resultsPerPage)
-            ->setPage(max((int) Tools::getValue('page'), 1))
-        ;
+        $query->setResultsPerPage($resultsPerPage)->setPage(max((int) Tools::getValue('page'), 1));
 
         // set the sort order if provided in the URL
         if (($encodedSortOrder = Tools::getValue('order'))) {
@@ -232,7 +229,6 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
          * Facets are encoded in the "q" URL parameter, which is passed
          * to the search provider through the query's "$encodedFacets" property.
          */
-
         $query->setEncodedFacets($encodedFacets);
 
         // We're ready to run the actual query!
@@ -242,14 +238,10 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
 
         $totalProductToSHow=$this->getTotalProductSTock($query);
 
-    
-
         /** @var ProductSearchResult $result */
          $result = new ProductSearchResult();
 
-         $result
-                ->setProducts(!empty($products) ?  $products: array())
-                ->setTotalProductsCount($totalProductToSHow);
+         $result->setProducts(!empty($products) ?  $products: array())->setTotalProductsCount($totalProductToSHow);
 
 
         // render the facets
@@ -297,8 +289,7 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
                     break;
                 }
             }
-        }        
-
+        }
 
         $searchVariables = array(
             'result' => $result,
@@ -328,14 +319,12 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
             //->setIdCategory($this->category->id)
             ->setSortOrder(new SortOrder('product', Tools::getProductsOrder('by'), Tools::getProductsOrder('way')));
 
-
-
         return $query;
     }
 
     protected function getDefaultProductSearchProvider()
     {
-         return new SearchProductSearchProvider(
+        return new SearchProductSearchProvider(
             $this->getTranslator()
         );
     }
@@ -343,8 +332,6 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
     public function getBreadcrumbLinks()
     {
         $breadcrumb = parent::getBreadcrumbLinks();
-
-      
 
         return $breadcrumb;
     }
@@ -356,17 +343,14 @@ class OutofstockOutstockModuleFrontController extends ProductListingFrontControl
         return $page;
     }
 
-    protected function getTemplateVarPagination(
-        ProductSearchQuery $query,
-         $result
-    ) {
+    protected function getTemplateVarPagination(ProductSearchQuery $query, $result)
+    {
         $pagination = new Pagination();
         $pagination
             ->setPage($query->getPage())
             ->setPagesCount(
                 (int) ceil($result->getTotalProductsCount() / $query->getResultsPerPage())
-            )
-        ;
+            );
 
         $totalItems = $result->getTotalProductsCount();
         $itemsShownFrom = ($query->getResultsPerPage() * ($query->getPage() - 1)) + 1;
