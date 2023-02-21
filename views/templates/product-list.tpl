@@ -38,7 +38,7 @@
 
         <div>
           {block name='product_list'}
-              {include file='module:outofstock/views/templates/products.tpl' listing=$listing}
+              {include file='module:psoutofstock/views/templates/products.tpl' listing=$listing}
           {/block}
         </div>
 

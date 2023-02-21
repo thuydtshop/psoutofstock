@@ -35,7 +35,7 @@ use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
 use PrestaShop\PrestaShop\Core\Product\Search\Pagination;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchResult;
 
-class PsOutofstockOutstockModuleFrontController extends ProductListingFrontController
+class PsOutofstockPsoutstockModuleFrontController extends ProductListingFrontController
 {
     /**
      * Initializes controller.
