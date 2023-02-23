@@ -239,6 +239,17 @@ class PsOutofstockPsoutOfstockModuleFrontController extends ProductListingFrontC
                             'id_product_attribute' => $productId['id_product_attribute']
                         ));
 
+                    if ($product['product_type'] === 'combinations' && count($product['attributes']) > 0) {
+                        $attribute = array_values($product['attributes'])[0];
+
+                        $product['name'] = $product['name'].' - '.$attribute['name'];
+
+                        $images = Image::getImages($this->context->language->id, $productId['id_product'], $productId['id_product_attribute']);
+                        if ($images) {
+                            $product['cover_image_id'] = $images[0]['id_image'];
+                        }
+                    }
+                    
                     $products_for_template[] = $presenter->present(
                         $presentationSettings,
                         $product,
