@@ -85,7 +85,7 @@ class PsOutOfStock extends Module implements WidgetInterface
 
     public function uninstallDB()
     {
-        return Db::getInstance()->execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'out_stock`');
+        // return Db::getInstance()->execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'out_stock`');
     }
 
     public function renderWidget($hookName = null, array $configuration = [])
