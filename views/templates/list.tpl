@@ -1,5 +1,4 @@
-<?php
-/**
+{**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
@@ -22,31 +21,40 @@
  * @author    PrestaShop SA and Contributors <contact@prestashop.com>
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
- */
+ *}
+{extends file=$layout}
 
-class PsOutstock extends ObjectModel
-{
-    public $id;
+{block name='content'}
+  <section id="main">
 
-    public $id_product;
+    {block name='product_list_header'}
+      <h2 id="js-product-list-header" class="h2" style="margin-bottom:20px;">{$listing.label}</h2>
+    {/block}
 
-    public $id_product_attribute;
+    <section id="products">
+      {if $listing.products|count}
+        <div>
+          {block name='product_list'}
+              {include file='module:psoutofstock/views/templates/products.tpl' listing=$listing}
+          {/block}
+        </div>
 
-    public $id_shop;
+        <div id="js-product-list-bottom">
+          {block name='product_list_bottom'}
+            {include file='catalog/_partials/products-bottom.tpl' listing=$listing}
+          {/block}
+        </div>
 
-    public $date_update;
+      {else}
+        <div id="js-product-list-top"></div>
 
-    /**
-     * @see ObjectModel::$definition
-     */
-    public static $definition = array(
-        'table' => 'out_stock',
-        'primary' => 'id',
-        'fields' => array(
-            'id_shop' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'id_product' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'id_product_attribute' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'date_update' => array('type' => self::TYPE_DATE, 'shop' => true, 'validate' => 'isDate'),
-        ),
-    );
-}
+        <div id="js-product-list">
+          {include file='errors/not-found.tpl'}
+        </div>
+
+        <div id="js-product-list-bottom"></div>
+      {/if}
+    </section>
+
+  </section>
+{/block}

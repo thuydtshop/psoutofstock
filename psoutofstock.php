@@ -38,15 +38,15 @@ class PsOutOfStock extends Module implements WidgetInterface
     public function __construct()
     {
         $this->name = 'psoutofstock';
-        $this->version = '1.0.0';
+        $this->version = '1.1.0';
         $this->author = 'alexbaysu07@gmail.com';
         $this->need_instance = 0;
         $this->bootstrap = true;
         $this->tab = 'front_office_features';
-        $this->controllers = array('outstock');
+        $this->controllers = array('psoutofstock');
 
         parent::__construct();
-        $this->displayName = $this->l('OutOfStock');
+        $this->displayName = $this->l('PsOutOfStock');
         $this->description = $this->l('Show products list back-in stock');
 
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
@@ -65,7 +65,7 @@ class PsOutOfStock extends Module implements WidgetInterface
     {
         $return = true;
         $return &= Db::getInstance()->execute('
-            CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'ps_out_stock` (
+            CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'out_stock` (
                 `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
                 `id_shop` int(10) unsigned NOT NULL ,
                 `id_product` int NOT NULL,
@@ -85,7 +85,7 @@ class PsOutOfStock extends Module implements WidgetInterface
 
     public function uninstallDB()
     {
-        return Db::getInstance()->execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'ps_out_stock`');
+        return Db::getInstance()->execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'out_stock`');
     }
 
     public function renderWidget($hookName = null, array $configuration = [])

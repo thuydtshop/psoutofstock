@@ -24,7 +24,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-// use PrestaShop\PrestaShop\Adapter\Category\CategoryProductSearchProvider;
+use PrestaShop\PrestaShop\Adapter\Category\CategoryProductSearchProvider;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
@@ -35,8 +35,27 @@ use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
 use PrestaShop\PrestaShop\Core\Product\Search\Pagination;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchResult;
 
-class PsOutofstockPsoutstockModuleFrontController extends ProductListingFrontController
+class PsOutofstockPsoutOfstockModuleFrontController extends ProductListingFrontController
 {
+    public $module;
+
+    protected $psoutofstocklist;
+
+    public function __construct()
+    {
+        /** @var BlockWishList $module */
+        $module = Module::getInstanceByName('psoutofstock');
+        $this->module = $module;
+
+        if (empty($this->module->active)) {
+            Tools::redirect('index');
+        }
+
+        parent::__construct();
+
+        $this->controller_type = 'modulefront';
+    }
+
     /**
      * Initializes controller.
      *
@@ -55,18 +74,63 @@ class PsOutofstockPsoutstockModuleFrontController extends ProductListingFrontCon
     public function initContent()
     {
         parent::initContent();
-        $template ='../../../modules/psoutofstock/views/templates/product-list.tpl';
+
         $this->doProductSearch(
-            $template,
+            '../../../modules/psoutofstock/views/templates/list.tpl',
             []
         );
     }
+
+    public function getListingLabel()
+    {
+        return $this->trans(
+            'Wieder lieferbar',
+            array(),
+            'Modules.Psoutofstock.Shop'
+        );
+    }
+
+    protected function getProductSearchQuery()
+    {
+        $query = new ProductSearchQuery();
+        $query->setSortOrder(
+            new SortOrder(
+                'product',
+                Tools::getProductsOrder('by'),
+                Tools::getProductsOrder('way')
+            )
+        );
+
+        return $query;
+    }
+
+    protected function getDefaultProductSearchProvider()
+    {
+        return new SearchProductSearchProvider(
+            $this->getTranslator()
+        );
+    }
+
+    public function getBreadcrumbLinks()
+    {
+        $breadcrumb = parent::getBreadcrumbLinks();
+
+        $breadcrumb['links'][] = [
+            'title' => $this->module->l('Wieder lieferbar'),
+            'url' => Context::getContext()->link->getModuleLink('psoutofstock', 'psoutofstock'),
+        ];
+
+        return $breadcrumb;
+    }
+
+
+
 
     private function getTotalProductSTock($qry)
     {
         $query = new DbQuery();
         $query->select('*');
-        $query->from('ps_out_stock');
+        $query->from('out_stock');
         $query->where('date_update  >= DATE_ADD(CURDATE(), INTERVAL "-15" DAY) ');
 
         $query->orderBy('date_update desc');
@@ -97,8 +161,7 @@ class PsOutofstockPsoutstockModuleFrontController extends ProductListingFrontCon
                 $backList[]=$stock;
             }
         }
-
-
+        
         if(empty($backList))
             return false;
 
@@ -110,7 +173,7 @@ class PsOutofstockPsoutstockModuleFrontController extends ProductListingFrontCon
     {
         $query = new DbQuery();
         $query->select('*');
-        $query->from('ps_out_stock');
+        $query->from('out_stock');
         $query->where('date_update  >= DATE_ADD(CURDATE(), INTERVAL "-15" DAY) ');
         
         $query->orderBy('date_update desc');
@@ -312,30 +375,6 @@ class PsOutofstockPsoutstockModuleFrontController extends ProductListingFrontCon
         return $searchVariables;
     }
 
-    protected function getProductSearchQuery()
-    {
-        $query = new ProductSearchQuery();
-        $query
-            //->setIdCategory($this->category->id)
-            ->setSortOrder(new SortOrder('product', Tools::getProductsOrder('by'), Tools::getProductsOrder('way')));
-
-        return $query;
-    }
-
-    protected function getDefaultProductSearchProvider()
-    {
-        return new SearchProductSearchProvider(
-            $this->getTranslator()
-        );
-    }
-
-    public function getBreadcrumbLinks()
-    {
-        $breadcrumb = parent::getBreadcrumbLinks();
-
-        return $breadcrumb;
-    }
-
     public function getTemplateVarPage()
     {
         $page = parent::getTemplateVarPage();
@@ -385,15 +424,6 @@ class PsOutofstockPsoutstockModuleFrontController extends ProductListingFrontCon
             'pages' => $pages,
             // Compare to 3 because there are the next and previous links
             'should_be_displayed' => (count($pagination->buildLinks()) > 3),
-        );
-    }
-
-    public function getListingLabel()
-    {
-        return $this->trans(
-            'Wieder lieferbar',
-            array(),
-            'Shop.Theme.Catalog'
         );
     }
 }
