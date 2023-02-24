@@ -97,18 +97,32 @@ class PsOutOfStock extends Module implements WidgetInterface
         $id_product = (int) $params['id_product'];
         $id_product_attribute = (int) $params['id_product_attribute'];
 
-        $quantity = (int) $params['quantity'];
+        // $quantity = (int) $params['quantity'];
         $context = Context::getContext();
         $id_shop = (int) $context->shop->id;
 
-        if($quantity<1){
+        // delete old data for speed up
+        Db::getInstance()->execute('
+            DELETE FROM '._DB_PREFIX_.'out_stock 
+            WHERE id_product='.$id_product.' AND id_product_attribute='.$id_product_attribute.' AND id_shop='.$id_shop
+        );
+
+        // fixed added default combination 
+        $product = new Product($id_product);
+        if ($product->product_type == 'combinations') {
+            if ($id_product_attribute == 0) {
+                return;
+            }
+        }
+
+        // if($quantity<1){
             $newStock=new PsOutstock();
             $newStock->id_product=$id_product;
             $newStock->id_product_attribute=$id_product_attribute;
             $newStock->id_shop=$id_shop;
             $newStock->date_update=date('Y-m-d');
             $newStock->add();
-        }
+        // }
     }
 
     public function getWidgetVariables($hookName = null, array $configuration = [])

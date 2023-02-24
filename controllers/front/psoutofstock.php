@@ -174,10 +174,13 @@ class PsOutofstockPsoutOfstockModuleFrontController extends ProductListingFrontC
         $query = new DbQuery();
         $query->select('*');
         $query->from('out_stock');
-        $query->where('date_update  >= DATE_ADD(CURDATE(), INTERVAL "-15" DAY) ');
+        $query->where('date_update  >= DATE_ADD(CURDATE(), INTERVAL "-15" DAY) '); // why 15 days?
         
         $query->orderBy('date_update desc');
-        $query->groupBy('id_product,id_product_attribute');
+        $query->orderBy('id_product desc');
+        $query->orderBy('id_product_attribute desc');
+
+        $query->groupBy('id_product, id_product_attribute');
 
         $context = Context::getContext();
         $id_shop = (int) $context->shop->id;
@@ -204,7 +207,7 @@ class PsOutofstockPsoutOfstockModuleFrontController extends ProductListingFrontC
                 $backList[]=$stock;
             }
         }
-
+        
         if(empty($backList)) {
             return false;
         }
