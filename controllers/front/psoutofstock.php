@@ -75,6 +75,9 @@ class PsOutofstockPsoutOfstockModuleFrontController extends ProductListingFrontC
     {
         parent::initContent();
 
+        // apply css and js
+        $this->context->controller->addCSS($this->module->getPathUri() . 'views/css/psoutofstock.css', 'all');
+
         $this->doProductSearch(
             '../../../modules/psoutofstock/views/templates/list.tpl',
             []
